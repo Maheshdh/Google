@@ -1,39 +1,42 @@
 class StockPrice:
 
     def __init__(self):
-        self.time_map = collections.defaultdict(int)
+        self.prices = {}
         self.cur_time = 0
-        self.max_heap = []
-        self.min_heap = []       
+        self.max_price, self.min_price = [],[]
 
     def update(self, timestamp: int, price: int) -> None:
-        self.time_map[timestamp] = price
+        self.prices[timestamp] = price
+        heapq.heappush(self.max_price,(-price,timestamp))
+        heapq.heappush(self.min_price, (price, timestamp))
         self.cur_time = max(self.cur_time, timestamp)
-        heapq.heappush(self.min_heap,(price,timestamp))
-        heapq.heappush(self.max_heap,(-price,timestamp))
         
 
     def current(self) -> int:
-        return self.time_map[self.cur_time]
+        return self.prices[self.cur_time]
+        
 
     def maximum(self) -> int:
-        if self.cur_time == 0:
+        if not self.max_price:
             return 0
-        while True:
-            probable_price, probable_time = heapq.heappop(self.max_heap)
-            probable_price = - 1 * probable_price
-            if self.time_map[probable_time] == probable_price:
-                heapq.heappush(self.max_heap,(-probable_price, probable_time))
-                return probable_price
+        while self.max_price:
+            price, timestamp = self.max_price[0]
+            price = -price
+            if self.prices[timestamp] == price:
+                return price
+            else:
+                heapq.heappop(self.max_price)
+
 
     def minimum(self) -> int:
-        if self.cur_time == 0:
+        if not self.min_price:
             return 0
-        while True:
-            p, t = heapq.heappop(self.min_heap)
-            if self.time_map[t] == p:
-                heapq.heappush(self.min_heap,(p,t))
-                return p
+        while self.min_price:
+            price, timestamp = self.min_price[0]
+            if self.prices[timestamp] == price:
+                return price
+            else:
+                heapq.heappop(self.min_price)
         
 
 
